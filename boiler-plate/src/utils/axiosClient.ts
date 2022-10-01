@@ -6,7 +6,7 @@ const client = axios.create({ baseURL: REACT_APP_BASE_URL });
 
 export const request = ({ ...options }) => {
   //   client.defaults.headers.common.Authorization = REACT_APP_AUTHORIZATION;
-  const onSuccess = (value: AxiosResponse<any, any>) => value;
+  const onSuccess = (value: AxiosResponse<unknown, unknown>) => value;
   const onError = (error: AxiosError) => error;
   return client(options).then(onSuccess).catch(onError);
 };
