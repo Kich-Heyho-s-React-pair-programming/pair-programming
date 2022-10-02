@@ -25,10 +25,14 @@ const request = (method: 'get' | 'post', url: string, params?: any, config?: Axi
 
   instance.interceptors.response.use(
     response => {
-      // if (response.status === 200 && response.data.success) { <-- 원래라면 api에서 success를 넘겨주겠지만 오픈 소스 api라 그런지 안넘겨줌
-      // throw 9;
+      /**
+      @author kich555
+      @description 실질적인 업무레벨 api response에서는 row data를 따로 wrapping 할 ResponseData구조체가 있겠지만, 이 프로젝트에서 default tester 로 사용하고 있는 open source api에서는 row data를 바로 반환하므로 아래의 조건식을 주석처리 함
+      if (response.status === 200 && response.data.success) 
+       */
       if (response.status === 200) {
         return response.data;
+        // return Promise.reject(response.data);
       } else {
         console.log((response.data && response.data.message) || 'Oops Something wrong');
         return Promise.reject(response.data);
