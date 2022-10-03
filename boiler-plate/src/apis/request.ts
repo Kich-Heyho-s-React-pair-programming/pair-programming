@@ -20,7 +20,7 @@ const defaultConfig: RequestConfig = {
 const request = (
   method: 'get' | 'post',
   url: string,
-  params?: any,
+  params?: Record<string, unknown>,
   config?: AxiosRequestConfig,
   interceptor?: {
     request?: any;
@@ -34,7 +34,7 @@ const request = (
     if (interceptor?.request && typeof interceptor.request === 'function') {
       return interceptor.request(request);
     }
-    return () => request;
+    return request;
   });
 
   instance.interceptors.response.use(
@@ -48,7 +48,8 @@ const request = (
         if (interceptor?.response && typeof interceptor.response === 'function') {
           return interceptor.response(response);
         }
-        return (() => response.data)();
+        return Promise.reject(response.data);
+        // return response.data;
         // return Promise.reject(response.data);
       } else {
         console.log((response.data && response.data.message) || 'Oops Something wrong');
@@ -56,14 +57,15 @@ const request = (
       }
     },
     error => {
-      if (error.response.status < 500) {
+      if (error.response.status >= 500) {
+        //handle sentry
       }
       return Promise.reject(error);
     },
   );
 
   if (params) {
-    Object.keys(params as object).forEach(item => {
+    Object.keys(params).forEach(item => {
       if (item && (params[item] === undefined || params[item] === null)) {
         delete params[item];
       }
