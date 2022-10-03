@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from 'axios';
+import axiosClient, { AxiosError, AxiosInterceptorManager, AxiosResponse } from 'axios';
 import type { AxiosRequestConfig, AxiosRequestHeaders, AxiosInstance } from 'axios';
-import { API_DOMAIN } from './config';
+import { ApiThrowError, API_DOMAIN } from './config';
 import { ResponseData } from 'apis';
 
 interface RequestConfig extends AxiosRequestConfig {
@@ -15,68 +15,84 @@ const defaultConfig: RequestConfig = {
     'content-type': 'application/json',
     'Access-Control-Allow-Origin': '*',
   },
+  validateStatus: function (status) {
+    return status < 500;
+  },
 };
 
-const request = (
-  method: 'get' | 'post',
-  url: string,
-  params?: Record<string, unknown>,
-  config?: AxiosRequestConfig,
-  interceptor?: {
-    request?: any;
-    response?: any;
-  },
-): any => {
-  const finalConfig: RequestConfig = { ...defaultConfig, ...config };
-  const instance: AxiosInstance = axios.create(finalConfig);
+interface RequestParams {
+  url: string;
+  method?: 'get' | 'post';
+  data?: Record<string, unknown>;
+  config?: AxiosRequestConfig;
+  specificInterceptor?: {
+    request?: (config: AxiosRequestConfig) => void;
+    response?: (response: ResponseData) => void;
+  };
+}
 
-  instance.interceptors.request.use(request => {
-    if (interceptor?.request && typeof interceptor.request === 'function') {
-      return interceptor.request(request);
+/**
+ * @author kich555
+ * @link https://blog.liufashi.top/2022/05/21/ts-axios/
+ * @description 위 링크를 기반으로 조금씩 손보았다.
+ *
+ */
+const request = ({ method, url, data, config, specificInterceptor }: RequestParams): any => {
+  const finalConfig: RequestConfig = { ...defaultConfig, ...config };
+  const instance: AxiosInstance = axiosClient.create(finalConfig);
+
+  instance.interceptors.request.use(config => {
+    if (specificInterceptor?.request && typeof specificInterceptor.request === 'function') {
+      return specificInterceptor.request(config);
     }
-    return request;
+    return config;
   });
 
   instance.interceptors.response.use(
-    (response: AxiosResponse<ResponseData>): ResponseData | Promise<never> => {
+    (response: AxiosResponse<ResponseData>): ResponseData | Promise<never> | void => {
       /**
       @author kich555
       @description 실질적인 업무레벨 api response에서는 row data를 따로 wrapping 할 ResponseData구조체가 있겠지만, 이 프로젝트에서 default tester 로 사용하고 있는 open source api에서는 row data를 바로 반환하므로 아래의 조건식을 주석처리 했다.
       if (response.status === 200 && response.data.success) 
        */
+
       if (response.status === 200) {
-        if (interceptor?.response && typeof interceptor.response === 'function') {
-          return interceptor.response(response);
+        if (specificInterceptor?.response && typeof specificInterceptor.response === 'function') {
+          return specificInterceptor.response(response.data);
         }
-        return Promise.reject(response.data);
-        // return response.data;
-        // return Promise.reject(response.data);
+        // return Promise.reject(new ApiThrowError('this error was thrown by api', response.data));
+        return response.data;
       } else {
         console.log((response.data && response.data.message) || 'Oops Something wrong');
-        return Promise.reject(response.data);
+        return Promise.reject(new ApiThrowError('this error was thrown by api', response.data));
       }
     },
-    error => {
-      if (error.response.status >= 500) {
+    (error: AxiosError) => {
+      console.log('isIn??-->', error.response?.status, error);
+      if (error.response?.status === 404) {
+        //handle sentry
+        console.log('iswork???_>');
+      }
+      if (error.request.status) {
         //handle sentry
       }
+      //500d이상의 에러 핸들링 :
       return Promise.reject(error);
     },
   );
 
-  if (params) {
-    Object.keys(params).forEach(item => {
-      if (item && (params[item] === undefined || params[item] === null)) {
-        delete params[item];
+  if (data) {
+    Object.keys(data).forEach(item => {
+      if (item && (data[item] === undefined || data[item] === null)) {
+        delete data[item];
       }
     });
   }
 
   return instance({
-    method,
+    method: method || 'get',
     url,
-    params: method && params,
-    data: method === 'post' && params,
+    data: method === 'post' && data,
   });
 };
 export default request;
