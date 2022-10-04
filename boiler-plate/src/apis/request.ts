@@ -1,6 +1,6 @@
 import axiosClient, { AxiosError, AxiosInterceptorManager, AxiosResponse } from 'axios';
 import type { AxiosRequestConfig, AxiosRequestHeaders, AxiosInstance } from 'axios';
-import { ApiThrowError, API_DOMAIN } from './config';
+import { ApiError, API_DOMAIN } from './config';
 import { ResponseData } from 'apis';
 
 interface RequestConfig extends AxiosRequestConfig {
@@ -15,9 +15,9 @@ const defaultConfig: RequestConfig = {
     'content-type': 'application/json',
     'Access-Control-Allow-Origin': '*',
   },
-  validateStatus: function (status) {
-    return status < 500;
-  },
+  // validateStatus: function (status) {
+  //   return status < 500;
+  // },
 };
 
 interface RequestParams {
@@ -34,7 +34,14 @@ interface RequestParams {
 /**
  * @author kich555
  * @link https://blog.liufashi.top/2022/05/21/ts-axios/
- * @description 위 링크를 기반으로 조금씩 손보았다.
+ * @description 위 링크를 기반으로 조금씩 손본 custom request입니다.
+ * 
+ * 구체적으로 타입을 보다 더 구체화하였고, 나만의 custom 타입, 로직들을 추가하였습니다. 
+ * 
+ * 긴 명령형 구조인게 마음에 들진 않지만, 현재까지는 특별한 개선방안이 떠오르지 않습니다 
+ * 
+ * 타입 구체화 등 리팩토링 할 부분들이 남아있으나, 
+ * 초기 기획과 구현은 끝났음으로 현재 버전을 초안으로 결정합니다.
  *
  */
 const request = ({ method, url, data, config, specificInterceptor }: RequestParams): any => {
@@ -60,23 +67,15 @@ const request = ({ method, url, data, config, specificInterceptor }: RequestPara
         if (specificInterceptor?.response && typeof specificInterceptor.response === 'function') {
           return specificInterceptor.response(response.data);
         }
-        // return Promise.reject(new ApiThrowError('this error was thrown by api', response.data));
+        // return Promise.reject(new ApiError('this error was thrown by api', response.data));
         return response.data;
       } else {
         console.log((response.data && response.data.message) || 'Oops Something wrong');
-        return Promise.reject(new ApiThrowError('this error was thrown by api', response.data));
+        return Promise.reject(new ApiError('this error was thrown by api', response.data));
       }
     },
     (error: AxiosError) => {
-      console.log('isIn??-->', error.response?.status, error);
-      if (error.response?.status === 404) {
-        //handle sentry
-        console.log('iswork???_>');
-      }
-      if (error.request.status) {
-        //handle sentry
-      }
-      //500d이상의 에러 핸들링 :
+      console.log('AxiosError-->', error.response?.status, error);
       return Promise.reject(error);
     },
   );
