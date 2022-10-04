@@ -2,7 +2,7 @@ import { ResponseData } from 'apis';
 
 export const API_DOMAIN = '';
 
-export class ApiThrowError extends Error {
+export class ApiError extends Error {
   data: ResponseData;
   constructor(message: string, data: ResponseData) {
     super(message);
