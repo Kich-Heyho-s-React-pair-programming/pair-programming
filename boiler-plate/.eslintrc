@@ -1,30 +1,55 @@
 {
-  "extends": ["react-app", "plugin:import/errors", "plugin:import/warnings", "prettier"],
-  "plugins": ["prettier"],
+  // "extends": ["@remix-run/eslint-config", "@remix-run/eslint-config/node"]
+  "extends": ["react-app", "plugin:react-hooks/recommended", "plugin:import/errors", "plugin:import/warnings", "plugin:@typescript-eslint/recommended", "plugin:react/recommended", "prettier"],
+  "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "project": ["tsconfig.json"]
+  },
   "settings": {
     "import/resolver": {
-      "node": {
-        "moduleDirectory": ["node_modules", "src/"] // 절대경로 노드 설정
-      }
+      "typescript": {}
     }
   },
   "rules": {
-    "no-var": "warn", // var 금지
-    "no-multiple-empty-lines": "warn", // 여러 줄 공백 금지
-    "no-nested-ternary": "warn", // 중첩 삼항 연산자 금지
-    "no-console": "warn", // console.log() 금지
-    "eqeqeq": "warn", // 일치 연산자 사용 필수
-    "dot-notation": "warn", // 가능하다면 dot notation 사용
-    "no-unused-vars": "warn", // 사용하지 않는 변수 금지
-    "react/destructuring-assignment": "warn", // state, prop 등에 구조분해 할당 적용
-    "react/jsx-pascal-case": "warn", // 컴포넌트 이름은 PascalCase로
-    "react/no-direct-mutation-state": "warn", // state 직접 수정 금지
-    "react/jsx-no-useless-fragment": "warn", // 불필요한 fragment 금지
-    "react/no-unused-state": "warn", // 사용되지 않는 state
-    "react/jsx-key": "warn", // 반복문으로 생성하는 요소에 key 강제
-    "react/self-closing-comp": "warn", // 셀프 클로징 태그 가능하면 적용
-    "react/jsx-curly-brace-presence": "warn", // jsx 내 불필요한 중괄호 금지
-    "import/no-unresolved": "off",
+    // "react-hooks/exhaustive-deps": "error",
+    "import/prefer-default-export": "off",
+    "implicit-arrow-linebreak": "warn",
+    "operator-linebreak": "warn",
+    "@typescript-eslint/no-use-before-define": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "react/require-default-props": "warn",
+    "jsx-quotes": "warn",
+    "no-nested-ternary": "warn",
+    "prettier/prettier": ["off", {}, { "usePrettierrc": true }],
+    "arrow-body-style": "warn",
+    "prefer-arrow-callback": "warn",
+    "@typescript-eslint/indent": "off",
+    "no-confusing-arrow": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-props-no-spreading": "warn",
+    "function-paren-newline": "warn",
+    "@typescript-eslint/no-namespace": "warn",
+    "object-curly-newline": "warn",
+    "react/jsx-curly-newline": "off",
+    "no-bitwise": ["error", { "allow": ["~"] }],
+    "no-continue": "warn",
+    "react/jsx-wrap-multilines": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "react/prop-types": "warn",
+    "global-require": "warn",
+    "no-tabs": ["error", { "allowIndentationTabs": true }],
+    "no-param-reassign": ["warn", { "props": true, "ignorePropertyModificationsFor": ["draft"] }],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "memberLike",
+        "modifiers": ["private"],
+        "format": ["camelCase"],
+        "leadingUnderscore": "allowSingleOrDouble"
+      }
+    ],
+    "no-underscore-dangle": "warn",
     "import/order": [
       "error",
       {
@@ -32,13 +57,6 @@
           ["builtin", "external"],
           ["index", "sibling", "parent", "internal", "object", "type"]
         ]
-      }
-    ],
-    "prettier/prettier": [
-      "warn",
-      {},
-      {
-        "usePrettierrc": true
       }
     ]
   }
