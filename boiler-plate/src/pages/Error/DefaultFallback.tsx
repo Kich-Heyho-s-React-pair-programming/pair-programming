@@ -1,4 +1,12 @@
-export function TestFallback({ error, resetErrorBoundary }) {
+import { TYPED_ERROR } from 'utils/error/defualtErrorhandler';
+
+interface DefaultFallbackProps {
+  error: any;
+  resetErrorBoundary: (...args: Array<unknown>) => void;
+}
+
+export function TestFallback({ error, resetErrorBoundary }: DefaultFallbackProps) {
+  console.log('error in fall back-->', error);
   return (
     <div role="alert">
       <p>Something went wrong:</p>
