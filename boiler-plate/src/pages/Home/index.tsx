@@ -1,6 +1,8 @@
 import { Container, Text, Box, Image } from '@mantine/core';
 import { useQuery } from 'react-query';
+// import { useEffect } from 'react';
 import { getTestRequestWithoutParams, getTestRequestWithParams } from 'apis';
+// import defualtErrorhandler from 'utils/error/defualtErrorhandler';
 
 function MovieCard() {
   <Box>
@@ -17,7 +19,14 @@ function MovieList() {
 }
 
 export default function Home() {
-  const { data } = useQuery(['test'], getTestRequestWithoutParams, { suspense: true });
+  const todoId = '12451345';
+  const { data } = useQuery(['test'], () => getTestRequestWithParams(todoId), { suspense: true });
+  // useEffect(() => {
+  //   const todoId = '12451345';
+  //   getTestRequestWithParams(todoId)
+  //     .then(data => console.log(data))
+  //     .catch(defualtErrorhandler);
+  // }, []);
 
   return <Container>test</Container>;
 }
